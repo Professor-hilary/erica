@@ -1,0 +1,26 @@
+{
+  "name": "FileShare",
+  "short_name": "FileShare",
+  "description": "Real-time file sharing and chat",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0c0c0c",
+  "theme_color": "#0c0c0c",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
