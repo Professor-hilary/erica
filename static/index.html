@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="FileShare" />
+  <link rel="apple-touch-icon" href="/static/icon-192.png" />
+  <meta name="theme-color" content="#e8a835" />
+  <title>FileShare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- ── Username prompt ──────────────────────────────────────────────────── -->
+  <div class="overlay" id="usernameOverlay">
+    <div class="prompt-card">
+      <span class="prompt-logo">⬡</span>
+      <h1 class="prompt-title">FileShare</h1>
+      <p class="prompt-sub">Choose a display name to join</p>
+      <input id="usernameInput" class="prompt-input" type="text" placeholder="Your name…" maxlength="32" autocomplete="off" />
+      <button class="btn btn-accent prompt-join" id="joinBtn">Join →</button>
+    </div>
+  </div>
+
+  <!-- ── File options modal ───────────────────────────────────────────────── -->
+  <div class="overlay hidden" id="fileOptionsOverlay">
+    <div class="options-card">
+      <div class="options-header">
+        <span class="options-icon" id="optionsIcon">📄</span>
+        <div class="options-info">
+          <div class="options-name" id="optionsName"></div>
+          <div class="options-meta" id="optionsMeta"></div>
+        </div>
+        <button class="close-btn" id="closeOptionsBtn">✕</button>
+      </div>
+      <div class="options-list">
+        <button class="option-row" id="optionView">
+          <span class="option-ico">⊡</span>
+          <div><div class="option-lbl">View</div><div class="option-sub">Open in browser</div></div>
+        </button>
+        <button class="option-row" id="optionShare">
+          <span class="option-ico">⇡</span>
+          <div><div class="option-lbl">Share to Chat</div><div class="option-sub">Send to active channel</div></div>
+        </button>
+        <button class="option-row" id="optionDownload">
+          <span class="option-ico">↓</span>
+          <div><div class="option-lbl">Download</div><div class="option-sub">Save to device</div></div>
+        </button>
+        <button class="option-row danger" id="optionDelete">
+          <span class="option-ico">⊘</span>
+          <div><div class="option-lbl">Delete</div><div class="option-sub">Remove from server</div></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── File viewer modal ────────────────────────────────────────────────── -->
+  <div class="overlay hidden" id="viewerOverlay">
+    <div class="viewer-shell">
+      <div class="viewer-bar">
+        <span class="viewer-name" id="viewerName">file</span>
+        <div class="viewer-btns">
+          <button class="vbtn" id="viewerDownload">↓ Download</button>
+          <button class="vbtn" id="viewerShare">⇡ Share</button>
+          <button class="close-btn" id="closeViewerBtn">✕</button>
+        </div>
+      </div>
+      <div class="viewer-body" id="viewerBody"></div>
+    </div>
+  </div>
+
+  <!-- ── App ──────────────────────────────────────────────────────────────── -->
+  <div class="app">
+
+    <!-- Sidebar: desktop/tablet only -->
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="s-hex">⬡</span>
+        <span class="s-title">FileShare</span>
+      </div>
+      <div class="section-label">Channels</div>
+      <nav class="channel-list" id="channelList">
+        <button class="ch-item active" data-ch="general" data-type="channel">
+          <span class="ch-hash">#</span><span class="ch-name">general</span>
+          <span class="ch-badge hidden" data-badge="general">0</span>
+        </button>
+        <button class="ch-item" data-ch="server" data-type="channel">
+          <span class="ch-hash">⬡</span><span class="ch-name">server</span>
+          <span class="ch-badge hidden" data-badge="server">0</span>
+        </button>
+      </nav>
+      <div class="section-label">
+        Direct Messages
+        <span class="online-pill" id="onlinePill">0</span>
+      </div>
+      <nav class="dm-list" id="dmList">
+        <p class="dm-empty">No one else online</p>
+      </nav>
+      <div class="section-label" style="margin-top:auto">Explore</div>
+      <nav class="channel-list">
+        <button class="ch-item" data-ch="files" data-type="tab">
+          <span class="ch-hash">🗂</span><span class="ch-name">Files</span>
+        </button>
+        <button class="ch-item" data-ch="browser" data-type="tab">
+          <span class="ch-hash">🔍</span><span class="ch-name">Browser</span>
+        </button>
+      </nav>
+      <div class="me-row" id="meRow">
+        <span class="me-avatar" id="meAvatar">?</span>
+        <span class="me-name" id="meName">…</span>
+        <button class="rename-btn" id="renameBtn" title="Change name">✎</button>
+      </div>
+    </aside>
+
+    <!-- Main panel -->
+    <div class="main-panel" id="mainPanel">
+
+      <!-- Chat view -->
+      <div class="chat-view" id="chatView">
+        <div class="chat-bar">
+          <div class="chat-bar-left">
+            <span class="chat-bar-icon" id="chatBarIcon">#</span>
+            <span class="chat-bar-title" id="chatBarTitle">general</span>
+          </div>
+          <span class="chat-bar-sub" id="chatBarSub">Everyone on this server</span>
+        </div>
+        <div class="feed" id="feed">
+          <div class="feed-welcome">
+            <div class="welcome-icon">⬡</div>
+            <h2>Welcome to FileShare</h2>
+            <p>Messages and files shared here are visible to everyone connected.</p>
+          </div>
+        </div>
+        <div class="composer">
+          <button class="attach-btn" id="attachBtn" title="Share a file">⊕</button>
+          <button class="voice-btn" id="voiceBtn" title="Hold to record voice message">🎙</button>
+          <textarea id="msgInput" class="msg-input" rows="1" placeholder="Message #general…"></textarea>
+          <button class="send-btn" id="sendBtn">↑</button>
+        </div>
+        <p class="composer-hint">Enter ↵ to send · Shift+Enter for newline · Hold 🎙 to record</p>
+      </div>
+
+      <!-- Files tab -->
+      <div class="side-panel hidden" id="filesView">
+        <div class="panel-bar">
+          <span class="panel-title">Files</span>
+          <button class="icon-btn" id="refreshFilesBtn">↺</button>
+        </div>
+        <div class="panel-body">
+          <div class="upload-zone" id="uploadZone">
+            <div class="uz-inner">
+              <span class="uz-arrow">↑</span>
+              <p>Drop files or <span class="uz-link">click to browse</span></p>
+              <p class="uz-hint">All file types · Multiple allowed</p>
+            </div>
+            <input type="file" id="fileInput" multiple hidden />
+          </div>
+          <div class="progress-wrap hidden" id="progressWrap">
+            <div class="progress-fill" id="progressFill"></div>
+            <span class="progress-text" id="progressText">Uploading…</span>
+          </div>
+          <div class="file-list" id="fileList"><p class="empty">Loading…</p></div>
+        </div>
+      </div>
+
+      <!-- Browser tab -->
+      <div class="side-panel hidden" id="browserView">
+        <div class="panel-bar">
+          <span class="panel-title">Browser</span>
+          <div class="view-toggle">
+            <button class="vt-btn active" data-view="list">☰</button>
+            <button class="vt-btn" data-view="grid">⊞</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="search-row">
+            <span class="s-icon">⌕</span>
+            <input type="text" id="searchInput" class="search-field" placeholder="Search files and folders…" autocomplete="off" />
+            <button class="s-clear hidden" id="searchClearBtn">✕</button>
+          </div>
+          <div class="breadcrumb" id="breadcrumb"></div>
+          <div class="b-status" id="bStatus"></div>
+          <div class="dir-list" id="dirList" data-view="list"><p class="empty">Loading…</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Mobile bottom navigation (phones/small tablets only) ─────────────── -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="bn-item active" data-ch="general" data-type="channel">
+      <span class="bn-icon">💬</span>
+      <span class="bn-label">Chat</span>
+      <span class="bn-badge hidden" data-bn-badge="general"></span>
+    </button>
+    <button class="bn-item" data-ch="files" data-type="tab">
+      <span class="bn-icon">🗂</span>
+      <span class="bn-label">Files</span>
+    </button>
+    <button class="bn-item" data-ch="browser" data-type="tab">
+      <span class="bn-icon">🔍</span>
+      <span class="bn-label">Browse</span>
+    </button>
+    <button class="bn-item" id="moreBtn">
+      <span class="bn-icon">⋯</span>
+      <span class="bn-label">More</span>
+    </button>
+  </nav>
+
+  <!-- Mobile slide-up drawer for channels & DMs -->
+  <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
+  <div class="mobile-drawer hidden" id="mobileDrawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-head">
+      <span class="drawer-title">Channels &amp; DMs</span>
+      <button class="close-btn" id="closeDrawerBtn">✕</button>
+    </div>
+    <div class="drawer-section-label">Channels</div>
+    <button class="drawer-item" data-ch="general" data-type="channel">
+      <span class="di-hash">#</span><span class="di-name">general</span>
+      <span class="di-badge hidden" data-drawer-badge="general"></span>
+    </button>
+    <button class="drawer-item" data-ch="server" data-type="channel">
+      <span class="di-hash">⬡</span><span class="di-name">server</span>
+      <span class="di-badge hidden" data-drawer-badge="server"></span>
+    </button>
+    <div class="drawer-section-label">
+      Direct Messages
+      <span class="online-pill" id="onlinePillMobile">0</span>
+    </div>
+    <div id="drawerDmList"><p class="dm-empty">No one else online</p></div>
+    <div class="drawer-me">
+      <span class="me-avatar" id="meAvatarMobile">?</span>
+      <span id="meNameMobile">…</span>
+      <button class="rename-btn" id="renameBtnMobile">✎ rename</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/static/script.js"></script>
+</body>
+</html>
