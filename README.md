@@ -175,7 +175,7 @@ fileshare/
 └── static/
     ├── index.html       ← App shell and all HTML
     ├── style.css        ← All styles (dark industrial theme)
-    ← script.js        ← All frontend logic
+    ├── script.js        ← All frontend logic
     ├── manifest.json    ← PWA manifest
     ├── sw.js            ← Service worker (offline caching)
     ├── icon-192.png     ← PWA icon
